@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE FOOD MARKET BATTLE: COUNTABLE OR UNCOUNTABLE?</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandYellow: '#FFD166',
+                        brandGreen: '#06D6A0',
+                        brandBlue: '#118AB2',
+                        brandRed: '#EF476F',
+                        brandPurple: '#8338EC',
+                        brandOrange: '#FF9F1C',
+                        bgLight: '#F8F9FA'
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        nunito: ['Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F3F4F6;
+            background-image: radial-gradient(#E5E7EB 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .heading-font {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .card-perspective {
+            perspective: 1000px;
+        }
+        .card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        .bounce-hover:hover {
+            transform: translateY(-5px) scale(1.02);
+            transition: all 0.2s ease;
+        }
+        /* Custom scrollbar for game logs */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between selection:bg-brandYellow selection:text-slate-900">
+
+    <!-- TOP NAV / HEADER -->
+    <header class="bg-white border-b-4 border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-brandYellow text-slate-900 p-2.5 rounded-2xl shadow-md border-2 border-slate-900 flex items-center justify-center">
+                    <i class="fa-solid font-bold fa-basket-shopping text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="heading-font text-xl md:text-2xl font-bold text-slate-800 leading-tight">
+                        FOOD MARKET BATTLE! 🛒
+                    </h1>
+                    <p class="text-xs font-semibold text-slate-500 tracking-wide uppercase">Countable vs Uncountable Nouns</p>
+                </div>
+            </div>
+
+            <!-- CONTROLS & UTILITIES -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="toggleSound()" id="soundToggleBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl border-2 border-slate-300 text-sm flex items-center gap-2 transition">
+                    <i class="fa-solid fa-volume-high text-brandBlue" id="soundIcon"></i>
+                    <span class="hidden sm:inline">Sound: ON</span>
+                </button>
+                <button onclick="openModal('instructionsModal')" class="bg-brandBlue hover:bg-sky-600 text-white font-bold px-3.5 py-2 rounded-xl border-b-4 border-sky-800 text-sm flex items-center gap-2 transition active:translate-y-0.5">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <span>Teacher Guide</span>
+                </button>
+                <button onclick="openModal('bossModal')" class="bg-brandPurple hover:bg-purple-700 text-white font-bold px-3.5 py-2 rounded-xl border-b-4 border-purple-900 text-sm flex items-center gap-2 transition active:translate-y-0.5 animate-pulse">
+                    <i class="fa-solid fa-crown"></i>
+                    <span>Final Boss</span>
+                </button>
+                <button onclick="resetGame()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold p-2 rounded-xl border-2 border-slate-300 text-sm" title="Reset Game">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow flex flex-col gap-6">
+
+        <!-- SCOREBOARD & ACTIVE TEAM BANNER -->
+        <section class="bg-white rounded-3xl p-4 md:p-6 border-4 border-slate-800 shadow-xl">
+            <!-- Active Turn Indicator -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b-2 border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-bold uppercase text-slate-400 tracking-wider">Current Turn:</span>
+                    <div id="activeTeamBadge" class="px-4 py-1.5 rounded-full font-bold text-white heading-font text-lg shadow-md flex items-center gap-2 bg-slate-800">
+                        <i class="fa-solid fa-users"></i> Select Active Team
+                    </div>
+                </div>
+                <div class="text-xs md:text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                    <i class="fa-regular fa-clock text-brandRed"></i> Suggested Time: 20 mins
+                </div>
+            </div>
+
+            <!-- Teams Leaderboard Cards Grid -->
+            <div id="teamsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+                <!-- Javascript will populate 5 team cards here -->
+            </div>
+        </section>
+
+        <!-- GAME GRID & CARD SECTION -->
+        <section class="w-full">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <h2 class="heading-font text-2xl font-bold text-slate-800">Choose a Supermarket Box</h2>
+                    <span id="remainingCardsCount" class="bg-brandYellow font-bold text-slate-900 text-xs px-2.5 py-1 rounded-full border border-slate-800">20 / 20 Left</span>
+                </div>
+                <!-- Legend -->
+                <div class="hidden lg:flex items-center gap-4 text-xs font-bold">
+                    <span class="flex items-center gap-1.5 text-blue-600"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Food Detectives</span>
+                    <span class="flex items-center gap-1.5 text-emerald-600"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Grammar Emergency</span>
+                    <span class="flex items-center gap-1.5 text-amber-600"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Crazy Market</span>
+                    <span class="flex items-center gap-1.5 text-purple-600"><span class="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> Power-Ups</span>
+                </div>
+            </div>
+
+            <!-- 20 GAME CARDS GRID -->
+            <div id="gameGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 md:gap-4">
+                <!-- Javascript will populate 20 cards -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t-2 border-slate-200 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs font-semibold text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <span>The Food Market Battle • 1st Semester High School English</span>
+            <span>Made with <i class="fa-solid fa-heart text-brandRed"></i> for Interactive Learning</span>
+        </div>
+    </footer>
+
+    <!-- MODAL: CARD QUESTION / PLAY -->
+    <div id="cardModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-slate-900 shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <!-- Modal Header -->
+            <div id="modalHeader" class="px-6 py-4 bg-brandBlue text-white flex justify-between items-center border-b-4 border-slate-900">
+                <div class="flex items-center gap-3">
+                    <span id="modalCategoryBadge" class="bg-white/20 text-white heading-font text-xs uppercase px-3 py-1 rounded-full font-bold">Category</span>
+                    <span id="modalPointsBadge" class="bg-brandYellow text-slate-900 heading-font text-xs font-extrabold px-3 py-1 rounded-full border border-slate-900">15 XP</span>
+                </div>
+                <button onclick="closeModal('cardModal')" class="text-white hover:text-slate-200 text-2xl font-bold leading-none">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 text-center space-y-6">
+                <!-- Active Team Turn Info -->
+                <div class="text-sm font-bold text-slate-500 uppercase tracking-wide">
+                    Question for: <span id="modalCurrentTeamName" class="text-brandBlue font-extrabold">Team 1</span>
+                </div>
+
+                <!-- Timer & Controls -->
+                <div class="flex justify-center items-center gap-3">
+                    <div id="modalTimer" class="heading-font text-3xl font-extrabold bg-slate-100 text-slate-800 border-2 border-slate-300 w-16 h-16 rounded-2xl flex items-center justify-center shadow-inner">
+                        25
+                    </div>
+                    <button onclick="toggleTimer()" id="timerToggleBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold p-3 rounded-xl text-sm border-2 border-slate-400">
+                        <i class="fa-solid fa-pause" id="timerIcon"></i>
+                    </button>
+                </div>
+
+                <!-- Question Text Container -->
+                <div class="min-h-[120px] flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-6">
+                    <h3 id="modalQuestionText" class="heading-font text-xl md:text-2xl font-bold text-slate-800 leading-snug">
+                        Question text goes here?
+                    </h3>
+                    <p id="modalSubtext" class="text-xs text-slate-500 font-semibold mt-2 hidden"></p>
+                </div>
+
+                <!-- Answer Reveal Area -->
+                <div id="answerContainer" class="hidden bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-4 text-emerald-900 animate-in fade-in duration-300">
+                    <div class="text-xs font-extrabold uppercase text-emerald-600 mb-1">Expected Answer / Solution</div>
+                    <div id="modalAnswerText" class="heading-font text-lg md:text-xl font-bold">Answer goes here</div>
+                </div>
+
+                <!-- Power-Up Actions Container (Only visible for special power-up cards) -->
+                <div id="powerUpActionsContainer" class="hidden space-y-3 bg-purple-50 p-4 rounded-2xl border-2 border-purple-300">
+                    <div class="text-xs font-bold text-purple-700 uppercase">Apply Special Action:</div>
+                    <div id="powerUpButtons" class="flex flex-wrap justify-center gap-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="px-6 py-4 bg-slate-100 border-t-2 border-slate-200 flex flex-wrap justify-between items-center gap-3">
+                <button onclick="toggleAnswer()" id="revealAnswerBtn" class="bg-slate-700 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow flex items-center gap-2">
+                    <i class="fa-solid fa-eye"></i> Show Answer
+                </button>
+
+                <div id="scoringButtons" class="flex items-center gap-2">
+                    <button onclick="handleQuestionResult(false)" class="bg-brandRed hover:bg-rose-600 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-md border-b-4 border-rose-800 flex items-center gap-2 transition active:translate-y-0.5">
+                        <i class="fa-solid fa-xmark"></i> Incorrect (0 XP)
+                    </button>
+                    <button onclick="handleQuestionResult(true)" class="bg-brandGreen hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md border-b-4 border-emerald-800 flex items-center gap-2 transition active:translate-y-0.5">
+                        <i class="fa-solid fa-check"></i> Correct (<span id="modalAwardPoints">15</span> XP)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: FINAL BOSS CHALLENGE -->
+    <div id="bossModal" class="fixed inset-0 bg-slate-900/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-purple-900 shadow-2xl w-full max-w-3xl overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-700 to-indigo-800 text-white px-6 py-5 border-b-4 border-purple-950 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-brandYellow text-slate-900 p-2 rounded-xl text-xl font-black">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div>
+                        <h2 class="heading-font text-2xl font-bold">THE FINAL BOSS CHALLENGE</h2>
+                        <p class="text-xs text-purple-200 font-semibold">25 Bonus XP for every team with a correct explanation!</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('bossModal')" class="text-white hover:text-slate-200 text-3xl font-bold leading-none">&times;</button>
+            </div>
+
+            <div class="p-6 md:p-8 space-y-6">
+                <!-- Boss Question Box -->
+                <div class="bg-purple-50 border-3 border-purple-300 rounded-2xl p-5 text-center space-y-3">
+                    <span class="bg-purple-600 text-white text-xs uppercase font-extrabold px-3 py-1 rounded-full">Final Task</span>
+                    <h3 class="heading-font text-xl md:text-2xl font-extrabold text-purple-950">
+                        “Explain the difference between countable and uncountable nouns and give two examples of each.”
+                    </h3>
+                </div>
+
+                <!-- Answer Key -->
+                <div class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 text-slate-800">
+                    <div class="text-xs font-extrabold text-emerald-700 uppercase tracking-wide mb-1"><i class="fa-solid fa-key"></i> Expected Answer / Guide:</div>
+                    <p class="text-sm font-semibold text-emerald-950">
+                        “Countable nouns can be counted individually, such as <strong>apples</strong> and <strong>eggs</strong>. Uncountable nouns are not normally counted individually, such as <strong>milk</strong> and <strong>rice</strong>.”
+                    </p>
+                </div>
+
+                <!-- Award Points to Teams -->
+                <div class="space-y-3">
+                    <h4 class="heading-font text-lg font-bold text-slate-800">Award +25 XP to teams with valid explanations:</h4>
+                    <div id="bossTeamAwardList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-slate-100 border-t-2 border-slate-200 flex justify-between items-center">
+                <button onclick="closeModal('bossModal')" class="text-slate-600 font-bold hover:text-slate-800 text-sm">Close</button>
+                <button onclick="declareWinner()" class="bg-brandYellow hover:bg-amber-400 text-slate-900 heading-font font-extrabold px-6 py-3 rounded-xl border-b-4 border-amber-600 text-base shadow-lg flex items-center gap-2 transition active:translate-y-0.5">
+                    <i class="fa-solid fa-trophy text-amber-700"></i> Announce Champion!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: WINNER CELEBRATION -->
+    <div id="winnerModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-amber-400 shadow-2xl w-full max-w-lg text-center p-8 relative overflow-hidden animate-in zoom-in duration-300">
+            <div class="text-6xl mb-4 animate-bounce">🏆</div>
+            <h2 class="heading-font text-3xl md:text-4xl font-extrabold text-slate-800 mb-2">VICTORY!</h2>
+            <p class="text-slate-500 font-semibold uppercase tracking-wider text-xs mb-6">Food Market Champions</p>
+            
+            <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 mb-6">
+                <div id="winnerTeamName" class="heading-font text-3xl font-extrabold text-amber-600 mb-1">TEAM NAME</div>
+                <div id="winnerScore" class="text-2xl font-bold text-slate-700">0 XP</div>
+            </div>
+
+            <p class="text-sm font-semibold text-slate-600 mb-6">Great job understanding countable and uncountable nouns in English!</p>
+
+            <button onclick="closeModal('winnerModal')" class="bg-brandBlue hover:bg-sky-600 text-white heading-font font-bold px-8 py-3 rounded-xl border-b-4 border-sky-800 text-lg shadow-lg">
+                Back to Game Board
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: TEACHER INSTRUCTIONS -->
+    <div id="instructionsModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-4 border-slate-900 shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-brandBlue text-white px-6 py-4 border-b-4 border-slate-900 flex justify-between items-center">
+                <h2 class="heading-font text-2xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-chalkboard-user"></i> Teacher Setup & Gameplay Rules
+                </h2>
+                <button onclick="closeModal('instructionsModal')" class="text-white hover:text-slate-200 text-3xl font-bold leading-none">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6 text-slate-700 text-sm">
+                <!-- Overview -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                    <div class="bg-slate-100 p-3 rounded-xl border border-slate-300">
+                        <div class="text-xs text-slate-500 uppercase font-bold">Level</div>
+                        <div class="font-extrabold text-slate-800">Beginner (1st Sem)</div>
+                    </div>
+                    <div class="bg-slate-100 p-3 rounded-xl border border-slate-300">
+                        <div class="text-xs text-slate-500 uppercase font-bold">Teams</div>
+                        <div class="font-extrabold text-slate-800">5 Teams</div>
+                    </div>
+                    <div class="bg-slate-100 p-3 rounded-xl border border-slate-300">
+                        <div class="text-xs text-slate-500 uppercase font-bold">Duration</div>
+                        <div class="font-extrabold text-slate-800">~20 Minutes</div>
+                    </div>
+                    <div class="bg-slate-100 p-3 rounded-xl border border-slate-300">
+                        <div class="text-xs text-slate-500 uppercase font-bold">Cards</div>
+                        <div class="font-extrabold text-slate-800">20 Mixed</div>
+                    </div>
+                </div>
+
+                <!-- Instructions Steps -->
+                <div class="space-y-3">
+                    <h3 class="heading-font text-lg font-bold text-slate-900 border-b pb-1">Game Setup & Flow</h3>
+                    <ol class="list-decimal list-inside space-y-2 font-medium">
+                        <li>Divide the classroom into <strong>5 distinct teams</strong>.</li>
+                        <li>Click on a Team card on the top bar to mark whose turn it currently is.</li>
+                        <li>Let the active team choose any numbered supermarket card on the grid.</li>
+                        <li>Give teams approximately <strong>20–30 seconds</strong> to discuss answers in English.</li>
+                        <li>Click <strong>"Show Answer"</strong> to verify and award points accordingly.</li>
+                        <li>Apply any special <strong>Power-Up actions</strong> (like Point Thief or Double Trouble) using the prompt buttons.</li>
+                        <li>Once all 20 cards are opened, click the <strong>"Final Boss"</strong> button for the conclusion challenge worth 25 XP per team!</li>
+                    </ol>
+                </div>
+
+                <!-- Categories -->
+                <div class="space-y-3">
+                    <h3 class="heading-font text-lg font-bold text-slate-900 border-b pb-1">4 Card Categories</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
+                            <strong class="text-blue-700 text-sm">🔍 Food Detectives</strong>
+                            <p class="text-slate-600 mt-1">Classify nouns as countable or uncountable and name lists of food items.</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                            <strong class="text-emerald-700 text-sm">🚨 Grammar Emergency</strong>
+                            <p class="text-slate-600 mt-1">Correct sentence mistakes and fill in missing quantifiers or foods.</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+                            <strong class="text-amber-700 text-sm">🤪 Crazy Market</strong>
+                            <p class="text-slate-600 mt-1">Funny teenager acting, fast speed rounds, mystery clues, and funny sentence raps.</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-purple-50 border border-purple-200">
+                            <strong class="text-purple-700 text-sm">⚡ Power-Ups</strong>
+                            <p class="text-slate-600 mt-1">Special actions to steal points from 1st place, double potential scores, or freeze teams!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-slate-100 border-t border-slate-200 text-right">
+                <button onclick="closeModal('instructionsModal')" class="bg-slate-800 text-white font-bold px-6 py-2 rounded-xl text-sm">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO SYNTHESIZER (WEB AUDIO API) -->
+    <script>
+        // Web Audio API Synthesizer for sound effects without external MP3 files
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'correct') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.2);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.2);
+                    });
+                } else if (type === 'wrong') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'powerup') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(900, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'tick') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.03);
+                }
+            } catch (e) {
+                console.log('Audio playback prevented or unsupported');
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggleBtn');
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                btn.innerHTML = `<i class="fa-solid fa-volume-high text-brandBlue"></i> <span class="hidden sm:inline">Sound: ON</span>`;
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-volume-xmark text-slate-400"></i> <span class="hidden sm:inline">Sound: OFF</span>`;
+            }
+        }
+    </script>
+
+    <!-- GAME DATA & LOGIC -->
+    <script>
+        // 5 Teams Configuration
+        const initialTeams = [
+            { id: 1, name: 'Super Chefs', score: 0, color: 'bg-rose-500', border: 'border-rose-700', text: 'text-rose-600' },
+            { id: 2, name: 'Cart Racers', score: 0, color: 'bg-sky-500', border: 'border-sky-700', text: 'text-sky-600' },
+            { id: 3, name: 'Food Ninjas', score: 0, color: 'bg-emerald-500', border: 'border-emerald-700', text: 'text-emerald-600' },
+            { id: 4, name: 'Snack Masters', score: 0, color: 'bg-amber-500', border: 'border-amber-700', text: 'text-amber-600' },
+            { id: 5, name: 'Market Kings', score: 0, color: 'bg-purple-500', border: 'border-purple-700', text: 'text-purple-600' }
+        ];
+
+        let teams = JSON.parse(JSON.stringify(initialTeams));
+        let activeTeamId = 1;
+        let currentCard = null;
+        let timerInterval = null;
+        let timerSeconds = 25;
+        let isTimerRunning = false;
+
+        // 20 Cards Dataset with Mixed Categories
+        const cardsData = [
+            {
+                id: 1,
+                number: 1,
+                category: 'Food Detectives',
+                catKey: 'detective',
+                points: 10,
+                colorClass: 'from-sky-400 to-blue-600',
+                question: 'Is "apple" countable or uncountable?',
+                answer: 'Countable',
+                type: 'standard'
+            },
+            {
+                id: 2,
+                number: 2,
+                category: 'Grammar Emergency',
+                catKey: 'emergency',
+                points: 15,
+                colorClass: 'from-emerald-400 to-teal-600',
+                question: 'Correct this sentence: "I have three milk."',
+                answer: '"I have three bottles / cartons / glasses of milk."',
+                type: 'standard'
+            },
+            {
+                id: 3,
+                number: 3,
+                category: 'Crazy Market',
+                catKey: 'crazy',
+                points: 15,
+                colorClass: 'from-amber-400 to-orange-500',
+                question: '🤖 THE HUMAN ROBOT!\nAct like a robot buying food! Your team must name 3 COUNTABLE foods while acting.',
+                answer: 'Example: Apples, bananas, burgers (acted out clearly like a robot).',
+                type: 'interactive'
+            },
+            {
+                id: 4,
+                number: 4,
+                category: 'Power-Ups',
+                catKey: 'powerup',
+                points: 0,
+                colorClass: 'from-purple-500 to-indigo-600',
+                question: '⚡ POINTS THIEF!\nYour team can steal 10 XP from the team currently in 1st place! (If your team is in 1st place, this power-up cannot be used).',
+                answer: 'Choose to steal points from the leader.',
+                type: 'powerup_thief'
+            },
+            {
+                id: 5,
+                number: 5,
+                category: 'Food Detectives',
+                catKey: 'detective',
+                points: 10,
+                colorClass: 'from-sky-400 to-blue-600',
+                question: 'Is "milk" countable or uncountable?',
+                answer: 'Uncountable',
+                type: 'standard'
+            },
+            {
+                id: 6,
+                number: 6,
+                category: 'Grammar Emergency',
+                catKey: 'emergency',
+                points: 10,
+                colorClass: 'from-emerald-400 to-teal-600',
+                question: 'Complete: "I need two ________."',
+                answer: 'Any suitable COUNTABLE noun plural (e.g., apples, eggs, bananas, tomatoes).',
+                type: 'standard'
+            },
+            {
+                id: 7,
+                number: 7,
+                category: 'Crazy Market',
+                catKey: 'crazy',
+                points: 20,
+                colorClass: 'from-amber-400 to-orange-500',
+                question: '👨‍🍳 THE CRAZY CHEF!\nYou have 20 seconds! Name four UNCOUNTABLE food nouns before the timer ends!',
+                answer: 'Example: Milk, rice, sugar, water, butter, bread.',
+                type: 'timed'
+            },
+            {
+                id: 8,
+                number: 8,
+                category: 'Food Detectives',
+                catKey: 'detective',
+                points: 10,
+                colorClass: 'from-sky-400 to-blue-600',
+                question: 'Which word is countable?\n👉 rice, banana, or water?',
+                answer: 'Banana',
+                type: 'standard'
+            },
+            {
+                id: 9,
+                number: 9,
+                category: 'Power-Ups',
+                catKey: 'powerup',
+                points: 0,
+                colorClass: 'from-purple-500 to-indigo-600',
+                question: '🎯 DOUBLE TROUBLE!\nYour team chooses another available card. If you answer it correctly, you get DOUBLE points! If incorrect, you get 0 points.',
+                answer: 'Select another question card to double its value!',
+                type: 'powerup_double'
+            },
+            {
+                id: 10,
+                number: 10,
+                category: 'Grammar Emergency',
+                catKey: 'emergency',
+                points: 10,
+                colorClass: 'from-emerald-400 to-teal-600',
+                question: 'Complete: "I need some ________."',
+                answer: 'Any suitable UNCOUNTABLE noun (e.g., milk, rice, sugar, water, cheese).',
+                type: 'standard'
+            },
+            {
+                id: 11,
+                number: 11,
+                category: 'Food Detectives',
+                catKey: 'detective',
+                points: 10,
+                colorClass: 'from-sky-400 to-blue-600',
+                question: 'Which word is uncountable?\n👉 egg, bread, or tomato?',
+                answer: 'Bread',
+                type: 'standard'
+            },
+            {
+                id: 12,
+                number: 12,
+                category: 'Crazy Market',
+                catKey: 'crazy',
+                points: 20,
+                colorClass: 'from-amber-400 to-orange-500',
+                question: '🎤 FOOD RAP!\nCreate a short, funny sentence using ONE countable noun AND ONE uncountable noun!',
+                answer: 'Example: "I have three apples, but I need some milk!"',
+                type: 'creative'
+            },
+            {
+                id: 13,
+                number: 13,
+                category: 'Grammar Emergency',
+                catKey: 'emergency',
+                points: 10,
+                colorClass: 'from-emerald-400 to-teal-600',
+                question: 'True or False?\n"Rice is normally an uncountable noun."',
+                answer: 'True',
+                type: 'standard'
+            },
+            {
+                id: 14,
+                number: 14,
+                category: 'Food Detectives',
+                catKey: 'detective',
+                points: 15,
+                colorClass: 'from-sky-400 to-blue-600',
+                question: 'Name three COUNTABLE foods!',
+                answer: 'Possible answers: Apples, eggs, bananas, cookies, tomatoes, oranges.',
+                type: 'standard'
+            },
+            {
+                id: 15,
+                number: 15,
+                category: 'Power-Ups',
+                catKey: 'powerup',
+                points: 15,
+                colorClass: 'from-purple-500 to-indigo-600',
+                question: '🌟 SUPER CHEF!\nBonus Card! Earn 15 Bonus XP right now if your team can name five food nouns correctly in 15 seconds!',
+                answer: 'Name 5 food items fast!',
+                type: 'powerup_bonus'
+            },
+            {
+                id: 16,
+                number: 16,
+                category: 'Grammar Emergency',
+                catKey: 'emergency',
+                points: 15,
+                colorClass: 'from-emerald-400 to-teal-600',
+                question: 'Correct this sentence: "She eats two breads."',
+                answer: '"She eats two slices of bread" OR "She eats two pieces of bread."',
+                type: 'standard'
+            },
+            {
+                id: 17,
+                number: 17,
+                category: 'Food Detectives',
+                catKey: 'detective',
+                points: 15,
+                colorClass: 'from-sky-400 to-blue-600',
+                question: 'Name three UNCOUNTABLE foods!',
+                answer: 'Possible answers: Milk, rice, sugar, butter, water, soup.',
+                type: 'standard'
+            },
+            {
+                id: 18,
+                number: 18,
+                category: 'Crazy Market',
+                catKey: 'crazy',
+                points: 15,
+                colorClass: 'from-amber-400 to-orange-500',
+                question: '🕵️ THE MYSTERY FOOD!\nClue: "You can eat me with a spoon, and I am normally uncountable. I am often served with vegetables or meat."',
+                answer: 'Rice (or Soup)',
+                type: 'riddle'
+            },
+            {
+                id: 19,
+                number: 19,
+                category: 'Food Detectives',
+                catKey: 'detective',
+                points: 10,
+                colorClass: 'from-sky-400 to-blue-600',
+                question: 'Is "cookie" countable or uncountable?',
+                answer: 'Countable',
+                type: 'standard'
+            },
+            {
+                id: 20,
+                number: 20,
+                category: 'Food Detectives',
+                catKey: 'detective',
+                points: 10,
+                colorClass: 'from-sky-400 to-blue-600',
+                question: 'Is "butter" countable or uncountable?',
+                answer: 'Uncountable',
+                type: 'standard'
+            }
+        ];
+
+        // Track state of cards (opened / available)
+        let playedCards = new Set();
+
+        // INITIALIZATION
+        window.onload = function() {
+            renderTeams();
+            renderGrid();
+        };
+
+        // Render Leaderboard Teams
+        function renderTeams() {
+            const container = document.getElementById('teamsContainer');
+            container.innerHTML = '';
+
+            teams.forEach(team => {
+                const isActive = team.id === activeTeamId;
+                const card = document.createElement('div');
+                card.className = `relative rounded-2xl p-3 md:p-4 border-3 transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                    isActive 
+                        ? 'bg-slate-900 text-white border-brandYellow shadow-lg scale-105 z-10' 
+                        : 'bg-slate-50 text-slate-800 border-slate-200 hover:border-slate-300'
+                }`;
+                card.onclick = () => selectActiveTeam(team.id);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-1 mb-2">
+                        <span class="heading-font font-bold text-sm md:text-base truncate">${team.name}</span>
+                        ${isActive ? '<span class="w-2.5 h-2.5 rounded-full bg-brandYellow animate-ping"></span>' : ''}
+                    </div>
+
+                    <div class="flex items-baseline justify-between">
+                        <span class="heading-font text-2xl md:text-3xl font-extrabold ${isActive ? 'text-brandYellow' : team.text}">
+                            ${team.score} <span class="text-xs font-normal text-slate-400">XP</span>
+                        </span>
+                        
+                        <!-- Manual score adjustments -->
+                        <div class="flex items-center gap-1">
+                            <button onclick="adjustScore(event, ${team.id}, -5)" class="w-6 h-6 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-black flex items-center justify-center shadow-sm" title="-5 XP">-</button>
+                            <button onclick="adjustScore(event, ${team.id}, 5)" class="w-6 h-6 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-black flex items-center justify-center shadow-sm" title="+5 XP">+</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            // Update badge text
+            const activeTeam = teams.find(t => t.id === activeTeamId);
+            const badge = document.getElementById('activeTeamBadge');
+            if (activeTeam) {
+                badge.innerText = activeTeam.name;
+                badge.className = `px-4 py-1.5 rounded-full font-bold text-white heading-font text-sm md:text-base shadow-md flex items-center gap-2 ${activeTeam.color}`;
+            }
+        }
+
+        // Set Active Team Turn
+        function selectActiveTeam(teamId) {
+            playSound('click');
+            activeTeamId = teamId;
+            renderTeams();
+        }
+
+        // Manual Score adjustment buttons (+5 / -5)
+        function adjustScore(event, teamId, amount) {
+            event.stopPropagation(); // prevent team selection trigger
+            playSound('click');
+            const team = teams.find(t => t.id === teamId);
+            if (team) {
+                team.score = Math.max(0, team.score + amount);
+                renderTeams();
+            }
+        }
+
+        // Render 20 Cards Grid
+        function renderGrid() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+
+            cardsData.forEach(cardData => {
+                const isPlayed = playedCards.has(cardData.id);
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card-perspective h-32 md:h-36 w-full cursor-pointer bounce-hover';
+                
+                cardEl.innerHTML = `
+                    <div class="card-inner w-full h-full relative rounded-2xl border-3 border-slate-900 shadow-md ${isPlayed ? 'is-flipped' : ''}" id="card-inner-${cardData.id}">
+                        <!-- FRONT OF CARD -->
+                        <div class="card-front absolute inset-0 bg-gradient-to-br ${cardData.colorClass} rounded-2xl p-3 flex flex-col justify-between items-center text-white">
+                            <span class="text-xs font-extrabold uppercase tracking-widest bg-black/20 px-2 py-0.5 rounded-full">
+                                Box
+                            </span>
+                            <span class="heading-font text-4xl md:text-5xl font-black drop-shadow-md">
+                                ${cardData.number}
+                            </span>
+                            <span class="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-md truncate max-w-full">
+                                ${cardData.category}
+                            </span>
+                        </div>
+
+                        <!-- BACK OF CARD (OPENED) -->
+                        <div class="card-back absolute inset-0 bg-slate-200 rounded-2xl p-3 flex flex-col justify-center items-center text-slate-400 border-2 border-dashed border-slate-400">
+                            <i class="fa-solid fa-check text-2xl text-slate-400 mb-1"></i>
+                            <span class="heading-font font-bold text-xs uppercase text-slate-500">Opened</span>
+                        </div>
+                    </div>
+                `;
+
+                if (!isPlayed) {
+                    cardEl.onclick = () => openCard(cardData);
+                }
+
+                grid.appendChild(cardEl);
+            });
+
+            // Update remaining cards badge
+            document.getElementById('remainingCardsCount').innerText = `${20 - playedCards.size} / 20 Left`;
+        }
+
+        // Open Question Modal
+        function openCard(card) {
+            playSound('click');
+            currentCard = card;
+
+            const activeTeam = teams.find(t => t.id === activeTeamId);
+            document.getElementById('modalCurrentTeamName').innerText = activeTeam.name;
+            document.getElementById('modalQuestionText').innerText = card.question;
+            document.getElementById('modalCategoryBadge').innerText = card.category;
+            document.getElementById('modalPointsBadge').innerText = `${card.points} XP`;
+            document.getElementById('modalAwardPoints').innerText = card.points;
+            document.getElementById('modalAnswerText').innerText = card.answer;
+            
+            // Hide answer container initially
+            document.getElementById('answerContainer').classList.add('hidden');
+            document.getElementById('revealAnswerBtn').innerHTML = `<i class="fa-solid fa-eye"></i> Show Answer`;
+
+            // Handle Power-Up specific actions view
+            const powerUpContainer = document.getElementById('powerUpActionsContainer');
+            const powerUpBtns = document.getElementById('powerUpButtons');
+            const scoringBtns = document.getElementById('scoringButtons');
+            powerUpBtns.innerHTML = '';
+
+            if (card.catKey === 'powerup') {
+                playSound('powerup');
+                powerUpContainer.classList.remove('hidden');
+
+                if (card.type === 'powerup_thief') {
+                    // Find leading team
+                    const sorted = [...teams].sort((a,b) => b.score - a.score);
+                    const leader = sorted[0];
+                    if (leader.id !== activeTeamId && leader.score > 0) {
+                        powerUpBtns.innerHTML = `
+                            <button onclick="executeThief(${activeTeamId}, ${leader.id})" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-xl text-xs">
+                                Steal 10 XP from ${leader.name} (${leader.score} XP)
+                            </button>
+                        `;
+                    } else {
+                        powerUpBtns.innerHTML = `<span class="text-xs font-semibold text-slate-500">Cannot steal: Your team is already in 1st place or leader has 0 XP!</span>`;
+                    }
+                } else if (card.type === 'powerup_double') {
+                    powerUpBtns.innerHTML = `
+                        <span class="text-xs font-semibold text-slate-600">Select another card next turn for DOUBLE points!</span>
+                    `;
+                } else if (card.type === 'powerup_bonus') {
+                    powerUpBtns.innerHTML = `
+                        <button onclick="awardDirectPoints(${activeTeamId}, 15)" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2 rounded-xl text-xs">
+                            Claim 15 Bonus XP!
+                        </button>
+                    `;
+                }
+            } else {
+                powerUpContainer.classList.add('hidden');
+            }
+
+            // Start Timer (25 seconds default)
+            resetTimer(25);
+            startTimer();
+
+            // Display Modal
+            openModal('cardModal');
+        }
+
+        // Toggle Answer Visibility
+        function toggleAnswer() {
+            playSound('click');
+            const ansContainer = document.getElementById('answerContainer');
+            const btn = document.getElementById('revealAnswerBtn');
+            if (ansContainer.classList.contains('hidden')) {
+                ansContainer.classList.remove('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-eye-slash"></i> Hide Answer`;
+            } else {
+                ansContainer.classList.add('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-eye"></i> Show Answer`;
+            }
+        }
+
+        // Handle Correct / Incorrect Button Click
+        function handleQuestionResult(isCorrect) {
+            stopTimer();
+            if (isCorrect) {
+                playSound('correct');
+                const team = teams.find(t => t.id === activeTeamId);
+                if (team && currentCard) {
+                    team.score += currentCard.points;
+                }
+            } else {
+                playSound('wrong');
+            }
+
+            // Mark card as played
+            if (currentCard) {
+                playedCards.add(currentCard.id);
+            }
+
+            // Flip next active team automatically
+            activeTeamId = (activeTeamId % 5) + 1;
+
+            renderTeams();
+            renderGrid();
+            closeModal('cardModal');
+        }
+
+        // Execute Points Thief Action
+        function executeThief(thiefId, victimId) {
+            playSound('powerup');
+            const thief = teams.find(t => t.id === thiefId);
+            const victim = teams.find(t => t.id === victimId);
+            if (thief && victim && victim.score >= 10) {
+                victim.score -= 10;
+                thief.score += 10;
+                renderTeams();
+            }
+            if (currentCard) playedCards.add(currentCard.id);
+            renderGrid();
+            closeModal('cardModal');
+        }
+
+        // Award direct points for bonus card
+        function awardDirectPoints(teamId, pts) {
+            playSound('correct');
+            const team = teams.find(t => t.id === teamId);
+            if (team) {
+                team.score += pts;
+                renderTeams();
+            }
+            if (currentCard) playedCards.add(currentCard.id);
+            renderGrid();
+            closeModal('cardModal');
+        }
+
+        // TIMER FUNCTIONS
+        function resetTimer(seconds) {
+            stopTimer();
+            timerSeconds = seconds;
+            document.getElementById('modalTimer').innerText = timerSeconds;
+            document.getElementById('modalTimer').classList.remove('text-red-600', 'animate-pulse');
+        }
+
+        function startTimer() {
+            isTimerRunning = true;
+            document.getElementById('timerIcon').className = 'fa-solid fa-pause';
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                document.getElementById('modalTimer').innerText = timerSeconds;
+
+                if (timerSeconds <= 5 && timerSeconds > 0) {
+                    playSound('tick');
+                    document.getElementById('modalTimer').classList.add('text-red-600', 'animate-pulse');
+                }
+
+                if (timerSeconds <= 0) {
+                    stopTimer();
+                    playSound('wrong');
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            const btn = document.getElementById('timerIcon');
+            if (btn) btn.className = 'fa-solid fa-play';
+        }
+
+        function toggleTimer() {
+            playSound('click');
+            if (isTimerRunning) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        // FINAL BOSS CHALLENGE
+        function setupBossModal() {
+            const container = document.getElementById('bossTeamAwardList');
+            container.innerHTML = '';
+
+            teams.forEach(team => {
+                const card = document.createElement('div');
+                card.className = 'flex items-center justify-between bg-slate-100 p-3 rounded-xl border border-slate-300';
+                card.innerHTML = `
+                    <span class="font-bold text-slate-800 text-sm">${team.name}</span>
+                    <button onclick="awardBossPoints(${team.id}, this)" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition">
+                        +25 XP Award
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function awardBossPoints(teamId, btnElement) {
+            playSound('correct');
+            const team = teams.find(t => t.id === teamId);
+            if (team) {
+                team.score += 25;
+                renderTeams();
+                btnElement.className = 'bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs border border-emerald-700';
+                btnElement.innerHTML = `<i class="fa-solid fa-check"></i> Awarded!`;
+                btnElement.disabled = true;
+            }
+        }
+
+        function declareWinner() {
+            playSound('correct');
+            closeModal('bossModal');
+
+            // Find highest score team
+            const sorted = [...teams].sort((a,b) => b.score - a.score);
+            const winner = sorted[0];
+
+            document.getElementById('winnerTeamName').innerText = winner.name;
+            document.getElementById('winnerScore').innerText = `${winner.score} XP`;
+
+            openModal('winnerModal');
+        }
+
+        // MODAL HELPERS
+        function openModal(id) {
+            if (id === 'bossModal') setupBossModal();
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            playSound('click');
+            if (id === 'cardModal') stopTimer();
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // RESET ENTIRE GAME
+        function resetGame() {
+            if (confirm("Are you sure you want to reset all team scores and cards?")) {
+                playSound('click');
+                teams = JSON.parse(JSON.stringify(initialTeams));
+                playedCards.clear();
+                activeTeamId = 1;
+                renderTeams();
+                renderGrid();
+            }
+        }
+    </script>
+</body>
+</html>
